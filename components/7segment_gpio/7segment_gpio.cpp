@@ -352,10 +352,10 @@ void LcdDigitsComponent::set_mode(LcdDigitsComponent::Mode mode) {
 
   switch (mode) {
   case BufferMode:
-    timerAlarmEnable(timer);
+    timerAlarm(timer, 10000, true, 0);
     break;
   case ProgressMode:
-    timerAlarmDisable(timer);
+    timerAlarm(timer, 10000, false, 0);
     break;
   }
   mode_ = mode;
@@ -433,14 +433,13 @@ void LcdDigitsComponent::setup() {
 
   // see https://esphome.io/api/ac__dimmer_8cpp_source
   assert(timer == nullptr);
-  timer = timerBegin(0, 80, true);
+  timer = timerBegin(1000000);
   if (timer) {
-    timerAttachInterrupt(timer, &s_timer_intr, true);
+    timerAttachInterrupt(timer, &s_timer_intr);
     // For ESP32, we can't use dynamic interval calculation because the timerX
     // functions are not callable from ISR (placed in flash storage). Here we
     // just use an interrupt firing every 50 µs.
-    timerAlarmWrite(timer, 50, true);
-    timerAlarmEnable(timer);
+    timerAlarm(timer, 10000, true, 0);
   } else {
     ESP_LOGE(TAG, "Can't initialize timer");
   }
